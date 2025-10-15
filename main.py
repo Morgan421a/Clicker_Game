@@ -1,49 +1,47 @@
 import tkinter as tk
 from recordstats import load_stats, save_stats
 
-
-root = tk.Tk() #creates parent window
-
-
-
+root = tk.Tk()
 root.title("Clicker Game")
-
 root.attributes('-zoomed', True)
 root.configure(background="light blue")
-root.minsize(200,200)
-root.maxsize(500,500)
+root.minsize(200, 200)
+root.maxsize(500, 500)
 root.geometry("300x300")
 
+# Load the full stats dict
 stats = load_stats()
-saved_score = stats.get("p_score", 0)
-sc_owned = stats.get("sc_owned", 0)
-value = stats["value"]
-print("Score:", saved_score)
+print("Loaded stats:", stats)
 
-def score(current_score):
-    current_score += value
-    saved_score["p_score"] = current_score
-    save_stats(saved_score)
-    score_label.config(text=f"Score: {current_score}")
-    print(current_score)
-    return current_score
+def score():
+    stats["p_score"] += stats.get("value", 1)
+    save_stats(stats)
+    score_label.config(text=f"Score: {stats['p_score']}")
+    print(stats["p_score"])
 
-def strgerclicks(sc_owned):
-    if saved_score >= 100:
-        sc_owned + 1
+def strgerclicks():
+    if stats["p_score"] >= 100:
+        stats["p_score"] -= 100
+        stats["value"] += 1
+        save_stats(stats)
         print("Click power increased by 1")
+        stronger_clicks.config(text=f"Stronger clicks : 100 points : {stats['value']}")
+        score_label.config(text=f"Score: {stats['p_score']}")
     else:
         print("Not enough points!")
 
-
-
-main_button = tk.Button(root, text="click me", command=lambda: score(saved_score)) #Lambda, creates an anonymous function
+# GUI Elements
+main_button = tk.Button(root, text="click me", command=score)
 main_button.pack()
 
-score_label = tk.Label(root, text=f"Score: {saved_score}")
+score_label = tk.Label(root, text=f"Score: {stats['p_score']}")
 score_label.pack()
 
-stronger_clicks = tk.Button(root, text=f"Stronger clicks : 100 points : {sc_owned}" , command=lambda: strgerclicks(sc_owned))
+stronger_clicks = tk.Button(
+    root,
+    text=f"Stronger clicks : 100 points : {stats['value']}",
+    command=strgerclicks
+)
 stronger_clicks.pack()
 
-root.mainloop() #runs main event loop
+root.mainloop()
